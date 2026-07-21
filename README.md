@@ -1,3 +1,5 @@
+
+
 # hanmin_UR3_capstone2026
 
 # UR3 Control
@@ -73,6 +75,7 @@ src/ur3_control/
 - [Home 자세 동작 영상]
 
 
+https://github.com/user-attachments/assets/a25b6415-de7d-4e45-afb4-b27023372a2c
 
 
 - [S/scan 자세 동작 영상]
