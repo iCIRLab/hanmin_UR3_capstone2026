@@ -73,7 +73,6 @@ src/ur3_control/
 - [Home 자세 동작 영상]
 
 
-https://github.com/user-attachments/assets/4e126653-02f4-4371-bae6-39dc437f0b62
 
 
 - [S/scan 자세 동작 영상]
