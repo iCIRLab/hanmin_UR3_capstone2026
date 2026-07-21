@@ -70,8 +70,8 @@ src/ur3_control/
 
 ## 동작 영상
 
-- [Home 자세 동작 영상](media/home_pose.mp4)
-- [S/scan 자세 동작 영상](media/s_pose.mp4)
+- [Home 자세 동작 영상](https://github.com/user-attachments/assets/760c2c79-8963-456d-abf3-11f6750f9c2f)
+- [S/scan 자세 동작 영상](https://github.com/user-attachments/assets/9da0c4cd-142f-4727-a1fc-7b31ce2118e9)
 
 ## 설치 및 빌드
 
