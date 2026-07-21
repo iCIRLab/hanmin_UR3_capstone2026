@@ -74,12 +74,29 @@ src/ur3_control/
 
 - [Home 자세 동작 영상]
 
-https://github.com/user-attachments/assets/a25b6415-de7d-4e45-afb4-b27023372a2c
+
+
+https://github.com/user-attachments/assets/10c69df7-1f68-4c9d-badb-e4784a0701eb
+
 
 
 - [S/scan 자세 동작 영상]
 
-https://github.com/user-attachments/assets/9da0c4cd-142f-4727-a1fc-7b31ce2118e9
+
+
+https://github.com/user-attachments/assets/a70367e5-fc25-490e-8b5b-d2ceaaec1e94
+
+
+
+- [캡스톤 예상 시나리오 동작 영상]
+  
+
+
+
+https://github.com/user-attachments/assets/3398298d-5247-47cf-bab5-a05952b1811a
+
+
+
 
 ## 설치 및 빌드
 
