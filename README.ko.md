@@ -66,11 +66,10 @@
 
 ### 주요 기능
 
-- **플래너 동등 비교**: 두 플래너가 같은 모델·한계·검증기·실행기를 공유하므로 계획 품질 차이만 남습니다
-- **이중 실행 게이트**: `plan_only`와 `execute`를 함께 바꿔야만 컨트롤러로 궤적이 전송됩니다
-- **보정 모델 단일화**: 실장비에서 추출한 `ur3_calibration.yaml`이 URDF와 MJCF 양쪽에 반영됩니다
-- **단일 실행 경로**: MoveIt의 실행 액션을 차단해 실제 전송은 `trajectory_executor` 한 곳에서만 일어납니다
-- **MuJoCo 백엔드**: 공식 `mujoco_ros2_control`의 `SystemInterface`를 사용한 전용 UR3 장면
+- **플래너**: MPlib과 MoveIt 2가 같은 모델·한계·검증기·실행기를 공유합니다
+- **MuJoCo**: 공식 `mujoco_ros2_control`의 `SystemInterface`를 사용한 전용 UR3 장면
+- **실행 경로**: 실제 전송은 `trajectory_executor` 한 곳뿐이며 `plan_only`와 `execute`를 함께 바꿔야 열립니다
+- **보정**: 실장비에서 추출한 `ur3_calibration.yaml`이 URDF와 MJCF 양쪽에 반영됩니다
 
 ---
 
@@ -80,7 +79,6 @@
 |---|---|---|
 | 로봇 팔 | Universal Robots UR3 (CB3) | `ur_robot_driver` 2.13.2, `scaled_joint_trajectory_controller` |
 | 카메라 | Intel RealSense D435i | 스트림 확인까지 구현, 좌표 발행 미구현 |
-| LiDAR | 미정 | 추후 검토 |
 
 ---
 
@@ -197,6 +195,8 @@ export PYTHONPATH=$HOME/.local/ros-humble-mujoco/opt/ros/humble/local/lib/python
 
 ### 3.3 작업대 배치
 
+실제 실험실 환경을 유사하게 구현한 배치입니다.
+
 | 항목 | `world` 기준 값 |
 |---|---|
 | 작업대 상판 중심 | `[-0.015, -0.015, 0.635] m` |
@@ -251,27 +251,6 @@ ros2 launch capstone_bringup ur3_arm.launch.py \
 ```
 
 `planner:=moveit`으로 바꿔도 실행기와 컨트롤러는 그대로입니다.
-
-**E. 임의 관절각 / TCP pose**
-
-통합 런치는 named goal만 받습니다. 임의 목표는 백엔드를 먼저 띄운 뒤 플래너 노드를 직접 실행합니다.
-
-```bash
-# 터미널 1: MuJoCo와 비활성 실행기
-ros2 launch capstone_bringup ur3_arm.launch.py \
-  backend:=mujoco planner:=none plan_only:=true execute:=false
-
-# 터미널 2: MoveIt 계획 서버 (MPlib은 이 터미널이 필요 없음)
-ros2 launch capstone_planning ur3_move_group.launch.py use_sim_time:=true
-
-# 터미널 3: [x,y,z,qx,qy,qz,qw] 목표, 계획만 발행
-ros2 run capstone_planning moveit_plan --ros-args \
-  -p use_sim_time:=true \
-  -p goal_mode:=pose \
-  -p goal_pose_xyzw:="[0.33,0.11,0.40,0.66,-0.65,0.27,-0.27]"
-```
-
-MPlib은 `mplib_plan`을 같은 `goal_mode:=pose`, `goal_pose_xyzw` 형식으로 실행합니다.
 
 ### 4.2 실제 UR3
 
