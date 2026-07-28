@@ -2,11 +2,6 @@
 
 **MPlib과 MoveIt 2를 하나의 계획–실행 경로 위에서 비교하는 UR3 매니퓰레이션 스택 (ROS 2 Humble).**
 
-두 플래너가 동일한 보정 UR3 모델, 동일한 관절 한계, 동일한 궤적 검증기와 실행기를 공유합니다.
-계획 결과만 바꿔 끼우므로 플래너 간 차이가 그대로 드러납니다. 기본 실행은
-`plan_only:=true`, `execute:=false`이며 이 상태에서는 궤적을 검사·출력만 하고 컨트롤러로
-보내지 않습니다. 모바일 베이스는 아직 이 범위에 통합하지 않았습니다.
-
 [English README](README.md)
 
 ## Demo
@@ -19,9 +14,9 @@
 
 <!-- V2: 기존 리포의 S/scan 자세 영상 URL -->
 
-### 캡스톤 목표 시나리오
+### 목표 시나리오
 
-<!-- V3: 기존 리포의 캡스톤 예상 시나리오 영상 URL -->
+<!-- V3: 기존 리포의 시나리오 영상 URL -->
 
 ### MuJoCo — MPlib 계획·실행
 
@@ -35,17 +30,8 @@
 
 ## 기준 자료
 
-이 저장소는 논문이 아니라 캡스톤 구현물입니다. 구조와 참고한 구현은 다음과 같습니다.
-
-- 입력 경계와 저장소 구성: [iCIRLab/icir_phri_panda_husky](https://github.com/iCIRLab/icir_phri_panda_husky)
-- 계획 라이브러리: [haosulab/MPlib](https://github.com/haosulab/MPlib),
-  [MPlib Getting Started](https://motion-planning-lib.readthedocs.io/latest/tutorials/getting_started.html)
-- 시뮬레이션 백엔드: [ros-controls/mujoco_ros2_control](https://github.com/ros-controls/mujoco_ros2_control)
-- 실장비 드라이버: [Universal Robots ROS 2 Driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver)
-- MuJoCo + ROS 2 워크플로 참고:
-  [Piper 예제](https://discourse.openrobotics.org/t/build-a-mujoco-ros2-robotic-arm-workflow-for-embodied-ai/55012),
-  [yanyuze1/agilex_arm_mujoco](https://github.com/yanyuze1/agilex_arm_mujoco),
-  [unitreerobotics/unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco)
+- [haosulab/MPlib](https://github.com/haosulab/MPlib)
+- [MPlib Getting Started](https://motion-planning-lib.readthedocs.io/latest/tutorials/getting_started.html)
 
 ---
 
@@ -88,29 +74,13 @@
 
 ---
 
-## 키보드 전용 버전과의 차이
-
-| 항목 | 이전 (`ur3_control`) | 현재 |
-|---|---|---|
-| 목표 생성 | 키 입력 → 고정 관절각 | named goal / 임의 관절각 / TCP pose |
-| 경로 생성 | 없음 (컨트롤러 spline 보간) | MPlib 또는 MoveIt 2 |
-| 충돌 검사 | 없음 | FCL planning world / MoveIt PlanningScene |
-| 궤적 검증 | 없음 | 관절 순서·위치·속도·가속도·시작오차·단조시간 |
-| 실행 대상 | 실제 UR3 전용 | MuJoCo 또는 실제 UR3 |
-| 안전 기본값 | 즉시 실행 | 계획 전용 (`plan_only:=true`) |
-
-기존에 실장비에서 검증한 키보드 Home/S 제어는 `capstone_manipulation`의
-`ur3_pose_control`로 그대로 보존했습니다.
-
----
-
 ## 하드웨어
 
-| 구성 | 모델 | 인터페이스 |
+| 구성 | 모델 | 상태 |
 |---|---|---|
 | 로봇 팔 | Universal Robots UR3 (CB3) | `ur_robot_driver` 2.13.2, `scaled_joint_trajectory_controller` |
-| 카메라 | Intel RealSense D435i | `realsense2_camera`, compressed image |
-| 모바일 베이스 | MD400T | 시리얼 — **보존만, 미통합** |
+| 카메라 | Intel RealSense D435i | 스트림 확인까지 구현, 좌표 발행 미구현 |
+| LiDAR | 미정 | 추후 검토 |
 
 ---
 
@@ -118,7 +88,7 @@
 
 ```text
 src/
-├── capstone_bringup/            # 통합 런치 (MuJoCo·실장비·D435i)
+├── capstone_bringup/            # 통합 런치 (MuJoCo·실장비)
 │   └── launch/
 │       ├── ur3_arm.launch.py         # 백엔드 + 플래너 + 실행기 통합 진입점
 │       ├── ur3_driver.launch.py      # 실제 UR3 드라이버
@@ -142,9 +112,7 @@ src/
 │   └── config/controllers.yaml
 ├── capstone_moveit_support/     # MoveIt의 별도 실행 경로 차단 플러그인
 ├── capstone_key_control/        # 단일 터미널 키 세션 (C++)
-├── capstone_perception/         # D435i compressed image viewer
-├── md_motor_driver_ros2/        # 보존된 모바일 베이스 하위 시스템
-└── serial-ros2/                 # 보존된 모바일 베이스 의존성
+└── capstone_perception/         # D435i 이미지 뷰어 (좌표 발행 미구현)
 ```
 
 ---
@@ -217,7 +185,6 @@ export PYTHONPATH=$HOME/.local/ros-humble-mujoco/opt/ros/humble/local/lib/python
 |---|---|---|
 | `plan_only` | `true` | 계획만 수행하고 궤적을 발행·출력 |
 | `execute` | `false` | `trajectory_executor` 비활성 |
-| `confirm_real_hardware` | `false` | `backend:=real` 사용 시 명시적 확인 필요 |
 
 실제 움직임은 `plan_only:=false execute:=true`를 **동시에** 지정해야 발생합니다.
 검증기는 관절 순서, 위치 한계, 속도 `0.5 rad/s`, 가속도 `0.5 rad/s²`, 시작점 오차
@@ -227,7 +194,6 @@ export PYTHONPATH=$HOME/.local/ros-humble-mujoco/opt/ros/humble/local/lib/python
 
 루트의 `ur3_calibration.yaml`은 실장비에서 추출한 값이며
 `ur3_calibrated.urdf`의 6개 관절 원점과 MJCF 모델에 함께 반영됩니다.
-`kinematics_params_file` 인자로 다른 파일을 지정할 수 있습니다.
 
 ### 3.3 작업대 배치
 
@@ -240,17 +206,6 @@ export PYTHONPATH=$HOME/.local/ros-humble-mujoco/opt/ros/humble/local/lib/python
 
 `5 mm` 간격은 UR3 base collision mesh가 상판과 초기 접촉하는 것을 막습니다.
 같은 상자가 MPlib FCL 월드와 MoveIt PlanningScene에 동일 좌표로 등록됩니다.
-수정 시 함께 고쳐야 하는 파일은 [docs/ur3_table_key_control.md](docs/ur3_table_key_control.md)에 있습니다.
-
-### 3.4 실장비 네트워크
-
-```text
-[UR3 CB3]  ────LAN────  [ROS 2 PC]
-192.168.56.1             192.168.56.2
- (robot_ip)              (reverse_ip)
-```
-
-티치펜던트의 External Control 프로그램이 `reverse_ip`를 가리켜야 합니다.
 
 ---
 
@@ -267,9 +222,9 @@ ros2 launch capstone_bringup ur3_arm.launch.py \
   initial_pose:=scan headless:=false show_ui:=true
 ```
 
-`initial_pose:=scan`은 팔이 접힌 자세라 형상 확인이 쉽고, `home`은 실장비 시험 기준인
-`[0,-90,0,-90,0,0]°`이라 화면에서는 팔이 수직에 가깝게 보입니다.
-`show_profiler:=true`, `show_sensor:=true`로 solver 그래프와 관절·`tool0` 센서 그래프를 켤 수 있습니다.
+`initial_pose:=scan`은 팔이 접힌 자세라 형상 확인이 쉽고, `home`은 `[0,-90,0,-90,0,0]°`이라
+화면에서는 팔이 수직에 가깝게 보입니다. `show_profiler:=true`, `show_sensor:=true`로
+solver 그래프와 관절·`tool0` 센서 그래프를 켤 수 있습니다.
 
 **B. MPlib 계획만**
 
@@ -320,50 +275,10 @@ MPlib은 `mplib_plan`을 같은 `goal_mode:=pose`, `goal_pose_xyzw` 형식으로
 
 ### 4.2 실제 UR3
 
-> ⚠️ 새 MPlib/MoveIt 실행 경로는 **아직 실제 UR3에서 실행하지 않았습니다.**
-> 아래를 모두 직접 확인한 뒤에만 `backend:=real`을 사용하십시오.
->
-> - 사람과 장애물이 로봇 작업 반경 밖에 있음
-> - 비상정지 버튼을 즉시 누를 수 있음
-> - Teach Pendant와 보호 정지가 정상임
-> - 속도 슬라이더가 10–20 %임
-> - External Control 프로그램이 준비됨
-> - `ur3_calibration.yaml`과 UR3/PC IP가 실제 장비와 일치함
+> **미적용.** 새 MPlib/MoveIt 계획–실행 경로는 아직 실제 UR3에서 실행하지 않았습니다.
+> 실행 절차는 실장비 검증을 마친 뒤 추가합니다.
 
-**Step 1 — 계획만 확인** (명시적 확인 플래그 필요)
-
-```bash
-ros2 launch capstone_bringup ur3_arm.launch.py \
-  backend:=real planner:=mplib named_goal:=home \
-  plan_only:=true execute:=false \
-  confirm_real_hardware:=true
-```
-
-**Step 2 — 실제 이동** (위 조건 재확인 후)
-
-```bash
-ros2 launch capstone_bringup ur3_arm.launch.py \
-  backend:=real planner:=mplib named_goal:=home \
-  plan_only:=false execute:=true \
-  confirm_real_hardware:=true
-```
-
-**Step 3 — 기존 검증된 직접 자세 제어** (플래너 경로와 별개, 위 영상 V1–V3의 구성)
-
-```bash
-ros2 launch capstone_bringup ur3_driver.launch.py
-ros2 run capstone_manipulation ur3_pose_control   # h: Home, s: scan, f: 취소, q: 종료
-```
-
-### 4.3 D435i
-
-```bash
-ros2 launch capstone_bringup d435i_camera_view.launch.py
-```
-
-MuJoCo 장면의 고정 카메라는 `/workcell_overview/color`, `/workcell_overview/depth`로 발행됩니다.
-
-### 4.4 모델 재생성
+### 4.3 모델 재생성
 
 URDF를 수정했을 때만 MJCF를 다시 만듭니다.
 
@@ -381,7 +296,7 @@ ros2 run capstone_mujoco generate_ur3_mjcf \
 
 ---
 
-## 5. 플래너 선택과 제약
+## 5. 플래너
 
 ### Named goal
 
@@ -389,31 +304,9 @@ ros2 run capstone_mujoco generate_ur3_mjcf \
 
 | 이름 | 관절각 (deg) | 비고 |
 |---|---|---|
-| `home` | `[0, -90, 0, -90, 0, 0]` | 실장비 시험 기준 자세 |
+| `home` | `[0, -90, 0, -90, 0, 0]` | 기준 자세 |
 | `scan` | `[0, -90, 90, -135, -90, 0]` | 접힌 관측 자세 |
 | `low_pick` | `[1.06, -64.67, 84.98, -155.31, -90.84, 0.66]` | `tool0` ≈ `[0.420, 0.120, 1.015] m`, 상판 위 `0.305 m` |
-
-### 주요 런치 인자
-
-| 인자 | 기본값 | 설명 |
-|---|---|---|
-| `backend` | `mujoco` | `mujoco` / `real` |
-| `planner` | `mplib` | `mplib` / `moveit` / `none` |
-| `named_goal` | `scan` | `home` / `scan` / `low_pick` |
-| `planning_time` | `5.0` | 계획 제한 시간 (s) |
-| `plan_only` | `true` | 계획만 수행 |
-| `execute` | `false` | 실행기 활성화 |
-| `confirm_real_hardware` | `false` | `backend:=real` 필수 확인 |
-| `initial_pose` | `home` | MuJoCo 초기 관절 상태 |
-| `headless` | `true` | MuJoCo 창 표시 여부 |
-| `show_ui` / `show_right_ui` | `true` / `false` | 좌·우 패널 |
-| `show_profiler` / `show_sensor` | `false` / `false` | 성능·센서 그래프 |
-| `window_width` / `window_height` | `1100` / `620` | 창 크기 |
-| `render_fps` / `render_vsync` | `60` / `false` | 렌더링 |
-| `render_device` | `default` | `default` / `nvidia` |
-| `launch_rviz` | `false` | RViz 동시 실행 |
-| `robot_ip` / `reverse_ip` | `192.168.56.1` / `192.168.56.2` | 실장비 네트워크 |
-| `kinematics_params_file` | `ur3_calibration.yaml` | 보정 파일 |
 
 ### MPlib과 MoveIt 2 비교
 
@@ -426,30 +319,6 @@ ros2 run capstone_mujoco generate_ur3_mjcf \
 | 목표 형식 | 관절각 / TCP pose | 관절 제약 / TCP position·orientation 제약 |
 | 추가 터미널 | 불필요 | TCP pose 계획 시 필요 |
 | 실행 경로 | 공통 `trajectory_executor` | 공통 `trajectory_executor` (실행 액션 차단) |
-
-MoveIt은 실행 액션 대신 계획 서비스만 노출하도록 `capstone_moveit_support`가 컨트롤러
-경계를 막고, 실제 컨트롤러 전송은 두 플래너가 공유하는 `trajectory_executor`
-한 곳에서만 일어납니다.
-
-### ⚠️ 알려진 제약
-
-> **MPlib은 continuous joint를 constrained planning에 쓸 수 없습니다.**
-> 원본 URDF는 그대로 두고 플래너 입력에서만 `wrist_3_joint`를 공통 `[-2π, 2π]`
-> revolute 한계로 변환합니다. MoveIt에도 같은 bounded 모델을 적용해 두 플래너 조건을 맞췄습니다.
-
-> **실제 UR3에서 새 플래너 경로는 아직 실행하지 않았습니다.**
-> 영상 V1–V3은 이전 키보드 직접 제어(`ur3_pose_control`) 구성에서 촬영한 것입니다.
-
-> **렌더링 성능은 GPU 드라이버에 좌우됩니다.**
-> 현재 노트북의 Mesa 23.2는 Intel GPU PCI ID `0x7d51`을 지원하지 않아 Xorg가 `llvmpipe`로
-> 시작합니다. MuJoCo 창이 전면에 있을 때 `800×480`에서 151–171 FPS였고, 다른 창에 가려지면
-> Xorg가 13–18 FPS로 throttling합니다. 성능 측정은 창을 전면에 두고 해야 합니다.
-
-> **`render_device:=nvidia`는 기본값이 아닙니다.**
-> 현재 Humble 백엔드는 PRIME offload 상태에서 `Ctrl+C` 종료 시 GLdispatch 충돌이 재현됩니다.
-
-> **모바일 베이스는 통합되지 않았습니다.**
-> `md_motor_driver_ros2`와 `serial-ros2`는 보존만 되어 있고 이 계획–실행 경로에 연결되지 않았습니다.
 
 ---
 
@@ -467,23 +336,6 @@ MoveIt은 실행 액션 대신 계획 서비스만 노출하도록 `capstone_mov
 - 정상 동작입니다. `plan_only:=false execute:=true`를 동시에 지정해야 전송됩니다
 - 검증기 거부 사유는 `trajectory_executor` 로그에 출력됩니다
 
-**실제 UR3 연결 실패**
-- 티치펜던트에서 External Control 프로그램 실행 여부 확인
-- `robot_ip`, `reverse_ip`가 실제 네트워크와 일치하는지 확인
-- `ping 192.168.56.1`
-
-**D435i 스트림이 열리지 않음**
-- USB 3.0 포트 연결 확인, `ros2 topic list | grep camera`
-
----
-
-## 검증 기록
-
-수치 비교와 시험 항목은 [docs/verification.md](docs/verification.md),
-작업대 배치와 충돌 처리는 [docs/ur3_table_key_control.md](docs/ur3_table_key_control.md)에 있습니다.
-주요 결과: MPlib이 사용하는 Pinocchio와 MuJoCo MJCF의 `tool0` FK 최대 위치 차이 `4.71e-7 m`,
-회전행렬 차이 `1.09e-6`.
-
 ---
 
 ## 라이선스
@@ -494,6 +346,5 @@ MIT License — [LICENSE](LICENSE) 참조.
 
 ## 연락처
 
-**류한민**
-<!-- 소속 표기 -->
+**유한민 (ryoohanmin)**
 ryoohanmin@gmail.com
