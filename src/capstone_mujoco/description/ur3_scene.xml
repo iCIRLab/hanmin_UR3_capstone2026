@@ -1,0 +1,147 @@
+<mujoco model="capstone_ur3_workcell">
+  <include file="ur3_model.xml"/>
+
+  <statistic center="0.34 0 0.28" extent="1.38"/>
+
+  <visual>
+    <headlight diffuse="0.65 0.65 0.65"
+               ambient="0.25 0.25 0.25"
+               specular="0.15 0.15 0.15"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <!--
+      Keep the interactive viewer light enough for the 144 Hz laptop panel.
+      4096 px shadows plus 4x MSAA at 2560x1600 reduced display FPS to ~13.
+      These settings affect rendering only, never MuJoCo physics or ros2_control.
+    -->
+    <quality shadowsize="1024" offsamples="1"/>
+    <map znear="0.01" zfar="20"/>
+    <global azimuth="125"
+            elevation="-24"
+            offwidth="960"
+            offheight="540"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox"
+             builtin="gradient"
+             rgb1="0.3 0.5 0.7"
+             rgb2="0.02 0.02 0.03"
+             width="512"
+             height="3072"/>
+    <texture type="2d"
+             name="groundplane"
+             builtin="checker"
+             mark="edge"
+             rgb1="0.20 0.30 0.40"
+             rgb2="0.10 0.20 0.30"
+             markrgb="0.8 0.8 0.8"
+             width="300"
+             height="300"/>
+    <material name="groundplane"
+              texture="groundplane"
+              texuniform="true"
+              texrepeat="4 4"
+              reflectance="0.2"/>
+    <material name="work_surface"
+              rgba="0.18 0.20 0.23 1"
+              specular="0.25"
+              shininess="0.4"/>
+    <material name="work_frame"
+              rgba="0.32 0.35 0.38 1"
+              specular="0.15"/>
+
+
+  </asset>
+
+  <worldbody>
+    <light name="key_light"
+           mode="targetbodycom"
+           target="wrist_3_link"
+           pos="-0.5 -1.0 1.8"
+           diffuse="0.9 0.9 0.9"
+           specular="0.25 0.25 0.25"
+           castshadow="true"/>
+    <light name="fill_light"
+           pos="1.2 0.8 1.5"
+           dir="-0.7 -0.4 -1"
+           directional="true"
+           diffuse="0.35 0.38 0.42"
+           specular="0.05 0.05 0.05"
+           castshadow="false"/>
+    <camera name="workcell_overview"
+            mode="targetbody"
+            target="wrist_3_link"
+            pos="1.55 -1.75 1.25"
+            fovy="52"/>
+
+    <geom name="floor"
+          type="plane"
+          size="5 5 0.1"
+          material="groundplane"
+          contype="1"
+          conaffinity="1"
+          group="0"/>
+
+    <body name="pickup_station">
+      <geom name="pickup_station_top"
+            type="box"
+            pos="-0.015 -0.015 0.635"
+            size="0.45 0.45 0.075"
+            material="work_surface"
+            contype="2"
+            conaffinity="1"
+            group="0"/>
+      <geom type="box" 
+            pos="-0.39 -0.39 0.28"
+            size="0.075 0.075 0.28"
+            material="work_frame"
+            contype="2"
+            conaffinity="1"
+            group="0"/>
+      <geom type="box"
+            pos="-0.39 0.36 0.28"
+            size="0.075 0.075 0.28"
+            material="work_frame"
+            contype="2"
+            conaffinity="1"
+            group="0"/>
+      <geom type="box"
+            pos="0.36 -0.39 0.28"
+            size="0.075 0.075 0.28"
+            material="work_frame"
+            contype="2"
+            conaffinity="1"
+            group="0"/>
+      <geom type="box"
+            pos="0.36 0.36 0.28"
+            size="0.075 0.075 0.28"
+            material="work_frame"
+            contype="2"
+            conaffinity="1"
+            group="0"/>
+    </body>
+
+
+
+
+  </worldbody>
+
+  <sensor>
+    <jointpos name="shoulder_pan_position" joint="shoulder_pan_joint"/>
+    <jointpos name="shoulder_lift_position" joint="shoulder_lift_joint"/>
+    <jointpos name="elbow_position" joint="elbow_joint"/>
+    <jointpos name="wrist_1_position" joint="wrist_1_joint"/>
+    <jointpos name="wrist_2_position" joint="wrist_2_joint"/>
+    <jointpos name="wrist_3_position" joint="wrist_3_joint"/>
+    <jointvel name="shoulder_pan_velocity" joint="shoulder_pan_joint"/>
+    <jointvel name="shoulder_lift_velocity" joint="shoulder_lift_joint"/>
+    <jointvel name="elbow_velocity" joint="elbow_joint"/>
+    <jointvel name="wrist_1_velocity" joint="wrist_1_joint"/>
+    <jointvel name="wrist_2_velocity" joint="wrist_2_joint"/>
+    <jointvel name="wrist_3_velocity" joint="wrist_3_joint"/>
+    <framepos name="tool0_position" objtype="site" objname="tool0"/>
+    <framelinvel name="tool0_linear_velocity"
+                 objtype="site"
+                 objname="tool0"/>
+  </sensor>
+</mujoco>

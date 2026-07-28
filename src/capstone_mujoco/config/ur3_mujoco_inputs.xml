@@ -1,0 +1,64 @@
+<mujoco_inputs>
+  <raw_inputs>
+    <option timestep="0.002"
+            integrator="implicitfast"
+            gravity="0 0 -9.81"
+            iterations="50"
+            solver="Newton"/>
+
+    <default>
+      <joint armature="0.01" damping="0.1" frictionloss="0.01"/>
+      <position dampratio="1.0"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+      <default class="collision">
+        <geom type="mesh"
+              contype="1"
+              conaffinity="2"
+              group="3"
+              rgba="0 0 0 0"
+              friction="0.8 0.02 0.001"
+              margin="0.001"/>
+      </default>
+    </default>
+
+    <actuator>
+      <position name="shoulder_pan_joint"
+                joint="shoulder_pan_joint"
+                kp="1200"
+                ctrlrange="-6.283185307179586 6.283185307179586"/>
+      <position name="shoulder_lift_joint"
+                joint="shoulder_lift_joint"
+                kp="1200"
+                ctrlrange="-6.283185307179586 6.283185307179586"/>
+      <position name="elbow_joint"
+                joint="elbow_joint"
+                kp="900"
+                ctrlrange="-3.141592653589793 3.141592653589793"/>
+      <position name="wrist_1_joint"
+                joint="wrist_1_joint"
+                kp="500"
+                ctrlrange="-6.283185307179586 6.283185307179586"/>
+      <position name="wrist_2_joint"
+                joint="wrist_2_joint"
+                kp="400"
+                ctrlrange="-6.283185307179586 6.283185307179586"/>
+      <position name="wrist_3_joint"
+                joint="wrist_3_joint"
+                kp="300"
+                ctrlrange="-6.283185307179586 6.283185307179586"/>
+    </actuator>
+
+    <keyframe>
+      <key name="home"
+           qpos="0 -1.5707963267948966 0 -1.5707963267948966 0 0"
+           ctrl="0 -1.5707963267948966 0 -1.5707963267948966 0 0"/>
+      <key name="scan"
+           qpos="0 -1.5707963267948966 1.5707963267948966 -2.356194490192345 -1.5707963267948966 0"
+           ctrl="0 -1.5707963267948966 1.5707963267948966 -2.356194490192345 -1.5707963267948966 0"/>
+    </keyframe>
+  </raw_inputs>
+
+  <processed_inputs/>
+</mujoco_inputs>

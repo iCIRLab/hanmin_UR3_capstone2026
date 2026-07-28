@@ -1,0 +1,4 @@
+compressed_camera_viewer:
+  ros__parameters:
+    color_topic: /sensors/d435i/color/image_raw/compressed
+    window_name: UR3 D435i Camera

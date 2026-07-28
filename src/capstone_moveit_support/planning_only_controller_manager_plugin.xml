@@ -1,0 +1,10 @@
+<library path="planning_only_controller_manager">
+  <class
+    name="capstone_moveit_support/PlanningOnlyControllerManager"
+    type="capstone_moveit_support::PlanningOnlyControllerManager"
+    base_class_type="moveit_controller_manager::MoveItControllerManager">
+    <description>
+      Empty controller manager used when MoveIt is only a planning server.
+    </description>
+  </class>
+</library>
